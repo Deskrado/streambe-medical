@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-PROJECT_ROOT = Path.home() / "streambe-medical"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 RAW = PROJECT_ROOT / "data/raw/data_clean/questions/US/US_qbank.jsonl"
 OUT = PROJECT_ROOT / "data/processed/sft/us_qbank_sft.jsonl"
