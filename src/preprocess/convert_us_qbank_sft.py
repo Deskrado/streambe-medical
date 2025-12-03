@@ -3,7 +3,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path.home() / "streambe-medical"
 
-RAW = PROJECT_ROOT / "data/raw/medqa_usmle/data_clean/questions/US/US_qbank.jsonl"
+RAW = PROJECT_ROOT / "data/raw/data_clean/questions/US/US_qbank.jsonl"
 OUT = PROJECT_ROOT / "data/processed/sft/us_qbank_sft.jsonl"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
