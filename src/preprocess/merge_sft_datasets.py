@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import random
 
-ROOT = Path("/home/deskrado/streambe-medical")
+ROOT = Path(__file__).resolve().parents[1]
 SFT_DIR = ROOT / "data/processed/sft"
 OUT_FILE = SFT_DIR / "dataset_sft_full.jsonl"
 
