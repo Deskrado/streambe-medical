@@ -4,7 +4,7 @@ import json
 # ROOT ahora apunta a /streambe-medical/src
 ROOT = Path(__file__).resolve().parents[1]
 
-RAW = ROOT / "data/raw/medqa_usmle/data_clean/questions/US"
+RAW = ROOT / "data/raw/data_clean/questions/US"
 OUT = ROOT / "data/processed/sft"
 
 print("🔄 Convirtiendo USMLE a SFT...")
