@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKENIZED_DIR = ROOT / "data/tokenized/qwen25"
-SFT_PATH = ROOT / "data/processed/sft/dataset_sft_full.jsonl"
+SFT_PATH = ROOT / "data/processed/sft/dataset_sft_full_clean.jsonl"
 BOOKS_PATH = ROOT / "data/processed/pretrain/textbooks_en.txt"
 
 TOKENIZED_DIR.mkdir(parents=True, exist_ok=True)
