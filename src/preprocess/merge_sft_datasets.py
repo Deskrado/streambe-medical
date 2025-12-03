@@ -1,43 +1,39 @@
+from pathlib import Path
 import json
 import random
-from pathlib import Path
 
-PROJECT_ROOT = Path.home() / "streambe-medical"
-SFT_DIR = PROJECT_ROOT / "data/processed/sft"
-OUT = PROJECT_ROOT / "data/processed/sft/dataset_sft_full.jsonl"
+ROOT = Path("/home/deskrado/streambe-medical")
+SFT_DIR = ROOT / "data/processed/sft"
+OUT_FILE = SFT_DIR / "dataset_sft_full.jsonl"
 
 FILES = [
-    "usmle_train_sft.jsonl",
-    "usmle_dev_sft.jsonl",
-    "usmle_test_sft.jsonl",
-    "medmcqa_sft.jsonl",
-    "us_qbank_sft.jsonl",
+    SFT_DIR / "usmle_train_sft.jsonl",
+    SFT_DIR / "usmle_dev_sft.jsonl",
+    SFT_DIR / "usmle_test_sft.jsonl",
+    SFT_DIR / "medmcqa_sft.jsonl",
+    SFT_DIR / "us_qbank_sft.jsonl",
 ]
 
 print("🔄 Cargando datasets...")
 
 records = []
 
-for fname in FILES:
-    path = SFT_DIR / fname
-    print(f"  ➜ Leyendo {path}")
-
-    with open(path, "r") as f:
-        for line in f:
+for f in FILES:
+    print(f"  ➜ Leyendo {f}")
+    with open(f, "r") as fin:
+        for line in fin:
             try:
-                obj = json.loads(line)
-                if "input" in obj and "output" in obj:
-                    records.append(obj)
+                records.append(json.loads(line))
             except:
                 continue
 
-print(f"📌 Total de ejemplos cargados: {len(records)}")
+print("📌 Total de ejemplos cargados:", len(records))
 
 print("🔀 Mezclando registros...")
 random.shuffle(records)
 
-print("💾 Guardando dataset final:", OUT)
-with open(OUT, "w") as fout:
+print(f"💾 Guardando dataset final: {OUT_FILE}")
+with open(OUT_FILE, "w") as fout:
     for r in records:
         fout.write(json.dumps(r) + "\n")
 

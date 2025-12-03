@@ -1,77 +1,82 @@
-from datasets import Dataset
 from transformers import AutoTokenizer
+from datasets import Dataset, DatasetDict, load_dataset
 from pathlib import Path
-import json
-import random
 
-PROJECT = Path.home() / "streambe-medical"
+ROOT = Path("/home/deskrado/streambe-medical")
+TOKENIZED_DIR = ROOT / "data/tokenized/qwen25"
+SFT_PATH = ROOT / "data/processed/sft/dataset_sft_full.jsonl"
+BOOKS_PATH = ROOT / "data/processed/pretrain/textbooks_en.txt"
 
-SFT_DATA = PROJECT / "data/processed/sft/dataset_sft_full.jsonl"
-PRETRAIN_DATA = PROJECT / "data/processed/pretrain/textbooks_en.txt"
-OUT_DIR = PROJECT / "data/tokenized"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-MODEL_NAME = "Qwen/Qwen2.5-7B"
+TOKENIZED_DIR.mkdir(parents=True, exist_ok=True)
 
 print("🔄 Cargando tokenizer Qwen2.5...")
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=True)
+tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
 
 # ---------------------------
-# SFT DATASET
+# CLEAN FUNCTION
+# ---------------------------
+
+def clean_text(example):
+    txt = example.get("text")
+
+    if txt is None:
+        return {"text": ""}
+
+    if not isinstance(txt, str):
+        try:
+            txt = str(txt)
+        except:
+            return {"text": ""}
+
+    txt = txt.strip()
+    return {"text": txt}
+
+# ---------------------------
+# 1. Tokenizar SFT
 # ---------------------------
 
 print("📚 Cargando dataset SFT...")
-records = []
-with open(SFT_DATA, "r") as f:
-    for line in f:
-        obj = json.loads(line)
-        text = f"<input>{obj['input']}\n<output>{obj['output']}"
-        records.append({"text": text})
 
-random.shuffle(records)
-split = int(len(records) * 0.98)
-train_ds = Dataset.from_list(records[:split])
-val_ds = Dataset.from_list(records[split:])
+sft_data = load_dataset(
+    "json",
+    data_files=str(SFT_PATH),
+    split="train"
+)
 
-print(f"📝 Train SFT: {len(train_ds)}")
-print(f"📝 Val SFT: {len(val_ds)}")
+print("🧹 Limpiando dataset SFT...")
+sft_data = sft_data.map(clean_text)
 
-def tokenize(batch):
-    return tokenizer(
-        batch["text"],
+print("📝 Registros SFT:", len(sft_data))
+
+def tokenize_fn(batch):
+    texts = [t if isinstance(t, str) and len(t) > 0 else "" for t in batch["text"]]
+    return tok(
+        texts,
         truncation=True,
         max_length=2048,
-        padding="max_length"
     )
 
-print("🔧 Tokenizando SFT train...")
-train_t = train_ds.map(tokenize, batched=True, remove_columns=["text"])
-train_t.save_to_disk(str(OUT_DIR / "sft_train"))
+print("🔧 Tokenizando SFT...")
+tokenized_sft = sft_data.map(tokenize_fn, batched=True)
 
-print("🔧 Tokenizando SFT val...")
-val_t = val_ds.map(tokenize, batched=True, remove_columns=["text"])
-val_t.save_to_disk(str(OUT_DIR / "sft_val"))
+print(f"💾 Guardando tokenized SFT en {TOKENIZED_DIR}/sft")
+tokenized_sft.save_to_disk(str(TOKENIZED_DIR / "sft"))
 
 # ---------------------------
-# PRETRAIN TEXTBOOKS
+# 2. Tokenizar libros médicos
 # ---------------------------
 
 print("📚 Cargando libros médicos...")
-with open(PRETRAIN_DATA, "r", errors="ignore") as f:
-    lines = [l.strip() for l in f.readlines() if l.strip()]
 
-pre_ds = Dataset.from_list([{"text": l} for l in lines])
+with open(BOOKS_PATH, "r") as f:
+    lines = [l.strip() for l in f if len(l.strip()) > 0]
 
-def tokenize_pretrain(batch):
-    return tokenizer(
-        batch["text"],
-        truncation=True,
-        max_length=2048,
-        padding="max_length"
-    )
+books_dataset = Dataset.from_dict({"text": lines})
 
 print("🔧 Tokenizando pretraining corpus...")
-pre_t = pre_ds.map(tokenize_pretrain, batched=True, remove_columns=["text"])
-pre_t.save_to_disk(str(OUT_DIR / "pretrain"))
+tokenized_books = books_dataset.map(tokenize_fn, batched=True)
+
+print(f"💾 Guardando tokenized pretraining corpus en {TOKENIZED_DIR}/pretrain")
+tokenized_books.save_to_disk(str(TOKENIZED_DIR / "pretrain"))
 
 print("🎉 TOKENIZACIÓN COMPLETA — Qwen2.5 LISTO PARA ENTRENAR")

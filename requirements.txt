@@ -19,7 +19,6 @@ torch>=2.1.0
 
 # --- Optional optimizations ---
 einops
-flash-attn==2.5.6  # Ignorar si tu GPU no soporta FA2
 
 # --- Data / preprocessing ---
 pandas
