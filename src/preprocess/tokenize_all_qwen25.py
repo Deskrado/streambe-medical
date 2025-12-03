@@ -2,7 +2,7 @@ from transformers import AutoTokenizer
 from datasets import Dataset, DatasetDict, load_dataset
 from pathlib import Path
 
-ROOT = Path("/home/deskrado/streambe-medical")
+ROOT = Path(__file__).resolve().parents[1]
 TOKENIZED_DIR = ROOT / "data/tokenized/qwen25"
 SFT_PATH = ROOT / "data/processed/sft/dataset_sft_full.jsonl"
 BOOKS_PATH = ROOT / "data/processed/pretrain/textbooks_en.txt"
