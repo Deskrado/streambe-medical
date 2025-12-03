@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src/data/processed/sft/dataset_sft_full.jsonl"
-DST = ROOT / "src/data/processed/sft/dataset_sft_full_clean.jsonl"
+SRC = ROOT / "data/processed/sft/dataset_sft_full.jsonl"
+DST = ROOT / "data/processed/sft/dataset_sft_full_clean.jsonl"
 
 print("🔎 Reparando dataset SFT...")
 
