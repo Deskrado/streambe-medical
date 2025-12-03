@@ -1,0 +1,12 @@
+model_name: "Qwen/Qwen2.5-7B"
+tokenized_dataset_path: "data/tokenized/sft_train"
+output_dir: "output/lora_qwen3"
+
+r: 16
+alpha: 32
+dropout: 0.05
+
+batch_size: 1
+grad_acc: 16
+learning_rate: 1e-4
+epochs: 3
