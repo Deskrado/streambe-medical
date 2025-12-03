@@ -11,7 +11,7 @@ print("🔄 Convirtiendo MedMCQA a SFT...")
 OUT.mkdir(parents=True, exist_ok=True)
 
 train_path = RAW / "train.csv"
-valid_path = RAW / "valid.csv"
+valid_path = RAW / "validation.csv"
 test_path = RAW / "test.csv"
 
 if not train_path.exists():
