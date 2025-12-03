@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]       # /streambe-medical/
-RAW = Path(__file__).resolve().parents[1] / "data" / "raw" / "medmcqa"
+RAW = Path(__file__).resolve().parents[1] / "data" / "raw" 
 OUT = BASE / "data/processed/sft"
 
 print("🔄 Convirtiendo MedMCQA a SFT...")
