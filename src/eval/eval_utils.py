@@ -1,21 +1,24 @@
+import json
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-def load_model(model_path):
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+def load_model(model_path, dtype=torch.float32):
+    print(f"🔄 Cargando modelo: {model_path}")
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
-        torch_dtype=torch.float16,
+        torch_dtype=dtype,
         device_map="auto",
         trust_remote_code=True
     )
-    return model, tokenizer
+    return tokenizer, model
 
-
-def generate_answer(model, tokenizer, prompt, max_new_tokens=256):
+def chat(model, tokenizer, prompt, max_new_tokens=256):
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    output = model.generate(
-        **inputs, max_new_tokens=max_new_tokens, temperature=0.0
-    )
-    text = tokenizer.decode(output[0], skip_special_tokens=True)
-    return text[len(prompt):].strip()
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            temperature=0.0
+        )
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)

@@ -1,26 +1,35 @@
-import json
-from eval_utils import load_model, generate_answer
+import pandas as pd
+from eval_utils import chat, load_model
 
-def evaluate_medmcqa(model_path, dataset_path):
-    model, tokenizer = load_model(model_path)
+def evaluate_medmcqa(model_path, dataset_path, limit=200):
+    tokenizer, model = load_model(model_path)
+
+    df = pd.read_csv(dataset_path).head(limit)
 
     correct = 0
-    total = 0
 
-    with open(dataset_path) as f:
-        for line in f:
-            row = json.loads(line)
-            q = row["question"]
-            choices = row["options"]
-            ans = row["cop"]
+    for _, row in df.iterrows():
+        prompt = f"""
+Responde la opción correcta (A/B/C/D).
 
-            prompt = f"Pregunta: {q}\nOpciones: {choices}\nRespuesta:"
-            pred = generate_answer(model, tokenizer, prompt)
+Pregunta:
+{row['question']}
 
-            if ans.lower() in pred.lower():
-                correct += 1
-            total += 1
+Opciones:
+A) {row['opa']}
+B) {row['opb']}
+C) {row['opc']}
+D) {row['opd']}
 
-    acc = correct / total
-    print(f"MedMCQA Accuracy: {acc:.4f}")
+Respuesta:
+        """
+
+        out = chat(model, tokenizer, prompt)
+        pred = out.strip()[-1].upper()
+
+        if pred == row["cop"].upper():
+            correct += 1
+
+    acc = correct / len(df)
+    print(f"🧪 MedMCQA Accuracy: {acc:.4f} ({correct}/{len(df)})")
     return acc

@@ -1,48 +1,29 @@
-# -------------------------------
-# STREAMBE MEDICAL — LLM PROJECT
-# Requirements FULL
-# -------------------------------
-
-# --- Core LLM stack ---
-transformers>=4.40.0
-accelerate>=0.29.0
-datasets>=2.18.0
-tokenizers>=0.19.0
+# ----------------------------
+# CORE
+# ----------------------------
+torch==2.4.0
+accelerate==0.33.0
+transformers==4.45.2
+datasets==3.0.1
 sentencepiece
 tiktoken
-bitsandbytes
-peft
-trl
+protobuf==4.25.3
 
-# --- PyTorch (CPU/GPU autodetect) ---
-torch>=2.1.0
+# ----------------------------
+# QLoRA / PEFT
+# ----------------------------
+# bitsandbytes==0.43.1           # CPU safe (sin CUDA obligatorio)
+peft==0.12.0
 
-# --- Optional optimizations ---
-einops
-
-# --- Data / preprocessing ---
-pandas
+# ----------------------------
+# UTILIDADES
+# ----------------------------
+pyyaml
 numpy
-tqdm
+pandas
+rich
+
+# ----------------------------
+# TOKENIZACIÓN / PREPROC
+# ----------------------------
 scikit-learn
-
-# --- JSONL utils ---
-jsonlines
-
-# --- HuggingFace Hub ---
-huggingface_hub
-
-# --- Kaggle ---
-kaggle
-kagglehub
-
-# --- Notebook support (si se usa Jupyter / Paperspace) ---
-jupyter
-notebook
-
-# --- Logging ---
-wandb
-tensorboard
-
-# --- General utilities ---
-python-dotenv

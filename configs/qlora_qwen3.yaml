@@ -1,25 +1,34 @@
+# ============================================================
+#  QLoRA config — Qwen 3 / Qwen2.5 (7B / base)
+# ============================================================
+
 model_name: "Qwen/Qwen2.5-7B"
 
-tokenized_dataset_path: "data/tokenized/sft_train"
-val_dataset_path: "data/tokenized/sft_val"
-
-output_dir: "output/qlora_qwen3"
-
-# QLoRA params
-bnb_4bit: true
-bnb_compute_dtype: "float16"
-bnb_quant_type: "nf4"
-
-lora_r: 64
-lora_alpha: 64
+# ------------------------------------------------------------
+# QLoRA
+# ------------------------------------------------------------
+lora_r: 16
+lora_alpha: 32
 lora_dropout: 0.05
 
-# Training
-epochs: 2
-batch_size: 1
-grad_acc: 32
-learning_rate: 1e-4
+# ------------------------------------------------------------
+# DATASETS TOKENIZADOS
+# (asegurate que existan estas carpetas)
+# ------------------------------------------------------------
+tokenized_dataset_path: "data/tokenized/qwen25/sft/train"
+val_dataset_path: "data/tokenized/qwen25/sft/val"
+
+# ------------------------------------------------------------
+# TRAINING PARAMS
+# ------------------------------------------------------------
+output_dir: "outputs/qlora_qwen3"
+epochs: 1                 # para test real
+batch_size: 1             # CPU-friendly
+grad_acc: 32              # simula batch_size 32
+learning_rate: 2e-4
 warmup_ratio: 0.03
-logging_steps: 20
+
+logging_steps: 50
 save_steps: 500
-report_to: ["wandb"]
+
+report_to: "none"         # evita errores de wandb

@@ -1,0 +1,21 @@
+model_name: "Qwen/Qwen2.5-7B-Instruct"
+
+# LoRA
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+
+# Dataset
+tokenized_dataset_path: "data/tokenized/qwen25/sft/train"
+val_dataset_path: "data/tokenized/qwen25/sft/val"
+
+# Training
+output_dir: "checkpoints/qwen25_lora_cpu"
+epochs: 1
+batch_size: 1
+grad_acc: 4
+learning_rate: 2e-4
+warmup_ratio: 0.05
+logging_steps: 10
+save_steps: 200
+report_to: "none"

@@ -7,7 +7,6 @@ from transformers import (
     TrainingArguments,
     Trainer,
     DataCollatorForLanguageModeling,
-    BitsAndBytesConfig
 )
 from peft import LoraConfig, get_peft_model
 
@@ -18,41 +17,27 @@ def load_config(path):
 
 
 def main():
-    cfg = load_config("configs/qlora_qwen3.yaml")
+    cfg = load_config("configs/lora_cpu_qwen3.yaml")
 
     print("🔄 Cargando tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(cfg["model_name"], trust_remote_code=True)
 
-    print("⚙️ Configurando 4-bit QLoRA CPU...")
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
-        llm_int8_enable_fp32_cpu_offload=True,  # 🔥 CPU offload
-    )
-
-    print("🧠 Cargando modelo Qwen en 4-bit (modo CPU)...")
+    print("🧠 Cargando modelo base en CPU (sin bitsandbytes)...")
     model = AutoModelForCausalLM.from_pretrained(
         cfg["model_name"],
-        device_map={"": "cpu"},   # 🔥 Forzar CPU
-        quantization_config=bnb_config,
-        torch_dtype=torch.bfloat16,
+        device_map={"": "cpu"},
+        torch_dtype=torch.float32,
         low_cpu_mem_usage=True,
         trust_remote_code=True,
     )
 
-    print("✨ Aplicando QLoRA...")
+    print("✨ Aplicando LoRA (CPU-friendly)...")
     lora_cfg = LoraConfig(
         r=cfg["lora_r"],
         lora_alpha=cfg["lora_alpha"],
         lora_dropout=cfg["lora_dropout"],
         task_type="CAUSAL_LM",
         bias="none",
-        target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",  # Qwen2.5 nombres correctos
-            "gate_proj", "up_proj", "down_proj"
-        ],
     )
 
     model = get_peft_model(model, lora_cfg)
@@ -62,17 +47,8 @@ def main():
     train_data = load_from_disk(cfg["tokenized_dataset_path"])
     val_data = load_from_disk(cfg["val_dataset_path"])
 
-    # Evitar errores si el dataset está vacío
-    def has_tokens(example):
-        return len(example["input_ids"]) > 0
-
-    print("🧹 Filtrando ejemplos vacíos...")
-    train_data = train_data.filter(has_tokens)
-    val_data = val_data.filter(has_tokens)
-
     data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
-    print("⚙️ Configurando argumentos de entrenamiento QLoRA CPU...")
     args = TrainingArguments(
         output_dir=cfg["output_dir"],
         num_train_epochs=cfg["epochs"],
@@ -84,19 +60,12 @@ def main():
         save_steps=cfg["save_steps"],
         save_total_limit=2,
         evaluation_strategy="steps",
-
-        # CPU ONLY
-        no_cuda=True,
+        fp16=False,  # CPU only
         bf16=False,
-        fp16=False,
-
         gradient_checkpointing=True,
         report_to=cfg["report_to"],
-
-        optim="paged_adamw_32bit",   # 🔥 Recomendado CPU + QLoRA
     )
 
-    print("🚀 Iniciando entrenamiento QLoRA en CPU...")
     trainer = Trainer(
         model=model,
         args=args,
@@ -105,9 +74,11 @@ def main():
         data_collator=data_collator,
     )
 
+    print("🚀 Entrenando modelo (LoRA CPU)...")
     trainer.train()
-    print("🎉 Entrenamiento QLoRA finalizado!")
+    print("🎉 Entrenamiento terminado!")
 
 
 if __name__ == "__main__":
     main()
+

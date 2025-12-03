@@ -1,27 +1,27 @@
-from eval_utils import load_model, generate_answer
-import random
 import json
+from eval_utils import chat, load_model
 
-def evaluate_mimic(model_path, mimic_dataset):
-    model, tokenizer = load_model(model_path)
+def evaluate_mimic(model_path, mimic_json_path, limit=20):
+    tokenizer, model = load_model(model_path)
 
-    with open(mimic_dataset) as f:
+    with open(mimic_json_path, "r") as f:
         data = json.load(f)
 
-    sample = random.sample(data, 200)
+    data = data[:limit]
 
-    score = 0
-    for item in sample:
-        context = item["note"]
-        question = item["question"]
-        true = item["answer"]
+    for i, note in enumerate(data):
+        prompt = f"""
+Eres un clínico. Resume la nota y da un diagnóstico probable.
 
-        prompt = f"Historia clínica: {context}\nPregunta: {question}\nRespuesta:"
-        pred = generate_answer(model, tokenizer, prompt)
+Nota clínica:
+{note['text']}
 
-        if true.lower() in pred.lower():
-            score += 1
+Responde en formato:
+- Resumen:
+- Diagnóstico probable:
+- Plan sugerido:
+"""
 
-    acc = score / len(sample)
-    print(f"MIMIC-III QA Accuracy: {acc:.4f}")
-    return acc
+        out = chat(model, tokenizer, prompt)
+        print(f"\n======== Caso {i+1} ========\n")
+        print(out)
