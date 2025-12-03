@@ -1,0 +1,81 @@
+# =======================================
+#  STREAMBE MEDICAL — LLM PROJECT
+#  .gitignore PREMIUM — IA / HF / DATA
+# =======================================
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+.env
+.venv/
+env/
+venv/
+
+# --- VSCode ---
+.vscode/
+.history/
+
+# --- Data (RAW / PROCESSED / TOKENIZED) ---
+data/
+data/raw/
+data/processed/
+data/tokenized/
+data/**/*.jsonl
+data/**/*.arrow
+data/**/*.csv
+data/**/*.zip
+datasets/
+*.arrow
+*.parquet
+
+# Kaggle
+kaggle.json
+*.kaggle
+
+# HuggingFace local data
+huggingface/
+~/.cache/huggingface/
+
+# Transformers cache
+~/.cache/torch/
+~/.cache/huggingface/
+~/.cache/datasets/
+~/.hf_cache/
+
+# Model weights
+*.pt
+*.bin
+*.safetensors
+*.h5
+*.onnx
+
+# Logs
+*.log
+logs/
+wandb/
+mlruns/
+
+# Checkpoints
+checkpoints/
+ckpts/
+output/
+runs/
+training_output/
+
+# Jupyter Lab checkpoints
+.ipynb_checkpoints
+
+# Pycharm
+.idea/
+
+# Build
+build/
+dist/
+
+# Others
+.DS_Store
+*.tmp
+*.swp
